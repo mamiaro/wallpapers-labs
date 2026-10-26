@@ -71,8 +71,9 @@ a:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; bo
 }
 
 header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.logo { font: 600 17px/1 var(--display); text-decoration: none; letter-spacing: -.01em; }
-.logo span { color: var(--accent-text); }
+.logo { display: inline-flex; align-items: center; gap: 8px; font: 600 17px/1 var(--display); text-decoration: none; letter-spacing: -.01em; }
+.logo img { width: 23px; height: auto; }
+.logo b { font-weight: inherit; color: var(--accent-text); }
 .top-x { font: 500 13px/1 var(--mono); color: var(--muted); text-decoration: none; }
 .top-x:hover { color: var(--fg); }
 
@@ -180,7 +181,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
 <div class="wrap" id="app">
 
   <header>
-    <a class="logo" id="logo" href="./">wallpapers<span>/</span>lab</a>
+    <a class="logo" id="logo" href="./"><img src="logo-prisma.png" width="116" height="102" alt=""><span>wallpapers<b>/</b>lab</span></a>
     <a class="top-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">@wallpaperslabs</a>
   </header>
 

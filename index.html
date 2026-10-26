@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>wallpapers/lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Arte abstracto para tu pantalla. Wallpapers gratis en alta resolución, para escritorio y mobile.">
+<meta property="og:title" content="wallpapers/lab · fondos gratis">
+<meta property="og:description" content="Arte abstracto para tu pantalla. Gratis, en alta resolución, para escritorio y mobile.">
+<meta property="og:image" content="galaxy/galaxia-1/vista.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* Layout: una sola columna; el fondo manda arriba, debajo nombre, descargas y la puerta de vuelta a X. */
+:root {
+  --bg: #0e0e10;
+  --surface: #17161c;
+  --line: #2a2833;
+  --fg: #ecebf2;
+  --muted: #9b98a8;
+  --accent-text: #aa9df6;
+  --btn-top: #3e3694;
+  --btn-bottom: #1f1a56;
+  --btn-edge: rgba(190, 178, 255, .35);
+  --btn-fg: #e6e1ff;
+  --display: "Space Grotesk", system-ui, sans-serif;
+  --body: "DM Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+  --r-lg: 18px;
+  --r-md: 12px;
+  --r-sm: 999px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f5f4f8; --surface: #ffffff; --line: #dedce6; --fg: #17161c;
+    --muted: #615e6e; --accent-text: #4b3fb0; color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f5f4f8; --surface: #ffffff; --line: #dedce6; --fg: #17161c;
+  --muted: #615e6e; --accent-text: #4b3fb0; color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.6 var(--body);
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+a:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; border-radius: var(--r-md); }
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.logo { font: 600 17px/1 var(--display); text-decoration: none; letter-spacing: -.01em; }
+.logo span { color: var(--accent-text); }
+.top-x { font: 500 13px/1 var(--mono); color: var(--muted); text-decoration: none; }
+.top-x:hover { color: var(--fg); }
+
+.stage { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.frame {
+  position: relative; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface);
+}
+.frame img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .5s ease; }
+.frame.listo img { opacity: 1; }
+.cargando {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  font: 400 12px/1 var(--mono); color: var(--muted); letter-spacing: .04em;
+  background: linear-gradient(100deg, transparent 30%, var(--line) 50%, transparent 70%) var(--surface);
+  background-size: 250% 100%; animation: brillo 1.6s linear infinite;
+  transition: opacity .4s ease;
+}
+.cargando::before {
+  content: ""; width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--line); border-top-color: var(--accent-text);
+  animation: giro .8s linear infinite;
+}
+.frame.listo .cargando { opacity: 0; pointer-events: none; }
+.frame.error .cargando { animation: none; }
+.frame.error .cargando::before { display: none; }
+@keyframes brillo { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+@keyframes giro { to { transform: rotate(360deg); } }
+figcaption { font: 400 12px/1.4 var(--mono); color: var(--muted); letter-spacing: .02em; }
+
+.info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.info > * { min-width: 0; }
+h1 { margin: 0 0 8px; font: 600 clamp(40px, 7vw, 64px)/1 var(--display); letter-spacing: -.03em; }
+.lead { margin: 0; color: var(--muted); max-width: 42ch; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding: 0; list-style: none; }
+.tags li { font: 400 12px/1 var(--mono); border: 1px solid var(--line); padding: 7px 11px; border-radius: var(--r-sm); color: var(--muted); }
+
+.downloads { display: flex; flex-direction: column; gap: 10px; }
+.dl {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px;
+  padding: 16px 18px; text-decoration: none; border-radius: var(--r-md);
+  background: linear-gradient(180deg, var(--btn-top), var(--btn-bottom));
+  color: var(--btn-fg);
+  box-shadow: inset 0 0 0 1px var(--btn-edge);
+  transition: filter .15s ease;
+}
+.dl:hover { filter: brightness(1.15); }
+.dl strong { font: 600 16px/1.2 var(--display); display: block; }
+.dl small { font: 400 12px/1.3 var(--mono); opacity: .75; }
+.dl svg { width: 20px; height: 20px; }
+
+.follow {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  border: 1px solid var(--line); background: var(--surface); padding: 18px 20px; border-radius: var(--r-lg);
+}
+.follow p { margin: 0; }
+.follow p strong { font: 600 16px/1.3 var(--display); display: block; }
+.follow p span { color: var(--muted); font-size: 14px; }
+.btn-x {
+  display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px;
+  border: 1px solid var(--fg); border-radius: var(--r-sm); text-decoration: none; font: 600 14px/1 var(--display);
+}
+.btn-x:hover { background: var(--fg); color: var(--bg); }
+.btn-x svg { width: 16px; height: 16px; }
+
+footer {
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  font: 400 12px/1.5 var(--mono); color: var(--muted);
+  border-top: 1px solid var(--line); padding-top: 18px;
+}
+footer nav { display: flex; gap: 16px; }
+footer a { text-decoration: none; color: var(--accent-text); }
+
+.vacio { display: flex; flex-direction: column; gap: 8px; padding-block: 48px; }
+.vacio h1 { font-size: clamp(32px, 5vw, 44px); }
+@media (max-width: 720px) {
+  .info { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dl, .frame img, .cargando { transition: none; }
+  .cargando, .cargando::before { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <header>
+    <a class="logo" href="./">wallpapers<span>/</span>lab</a>
+    <a class="top-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">@wallpaperslabs</a>
+  </header>
+
+  <figure class="stage" id="stage">
+    <div class="frame" id="frame">
+      <img id="vista" width="1600" height="900" alt="">
+      <div class="cargando" id="cargando" role="status">Cargando fondo…</div>
+    </div>
+    <figcaption>Escritorio · 16:9</figcaption>
+  </figure>
+
+  <section class="info" id="info">
+    <div>
+      <h1 id="titulo">&nbsp;</h1>
+      <p class="lead"><span id="descripcion"></span> Gratis, en alta resolución, sin registro y sin marca de agua.</p>
+      <ul class="tags" id="tags"></ul>
+    </div>
+
+    <div class="downloads">
+      <a class="dl" id="dl-escritorio" href="#" download>
+        <span><strong>Descargar para escritorio</strong><small id="peso-escritorio"></small></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      </a>
+      <a class="dl" id="dl-mobile" href="#" download>
+        <span><strong>Descargar para mobile</strong><small id="peso-mobile"></small></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <section class="vacio" id="vacio" hidden>
+    <h1>No encontramos ese fondo</h1>
+    <p class="lead">Puede que el link esté incompleto. Mirá los últimos fondos en nuestro perfil de X.</p>
+  </section>
+
+  <section class="follow">
+    <p><strong>¿Te gustó? Hay un fondo nuevo cada tanto.</strong><span>Seguinos en X para ver el próximo antes que nadie.</span></p>
+    <a class="btn-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3Zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43Z"/></svg>
+      Seguir en X
+    </a>
+  </section>
+
+  <footer>
+    <span>Gratis para uso personal.</span>
+    <nav>
+      <!-- CAMBIAR: tus links de Cafecito y Patreon -->
+      <a href="https://cafecito.app/TU_USUARIO" target="_blank" rel="noopener">Cafecito</a>
+      <a href="https://patreon.com/TU_USUARIO" target="_blank" rel="noopener">Patreon</a>
+    </nav>
+  </footer>
+
+</div>
+<script>
+// Muestra el fondo que pide la URL: index.html?wallpaper=galaxy/galaxia-1
+// Sin parámetro muestra el primero de wallpapers.json (el más nuevo arriba).
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  const pedido = params.get("wallpaper") || location.hash.slice(1);
+  let fondos = [];
+  try {
+    fondos = await (await fetch("wallpapers.json", { cache: "no-cache" })).json();
+  } catch (e) {}
+  const f = pedido ? fondos.find((x) => x.id === pedido) : fondos[0];
+
+  if (!f) {
+    $("stage").hidden = true;
+    $("info").hidden = true;
+    $("vacio").hidden = false;
+    document.title = "Fondo no encontrado · wallpapers/lab";
+    return;
+  }
+
+  const carpeta = f.id + "/";
+  document.title = f.titulo + " · wallpapers/lab";
+  const img = $("vista");
+  img.onload = () => $("frame").classList.add("listo");
+  img.onerror = () => {
+    $("frame").classList.add("error");
+    $("cargando").textContent = "No se pudo cargar la vista previa";
+  };
+  img.src = carpeta + "vista.jpg";
+  if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
+  $("vista").alt = f.titulo + " en formato escritorio";
+  $("titulo").textContent = f.titulo;
+  $("descripcion").textContent = f.descripcion;
+  $("tags").innerHTML = "";
+  (f.tags || []).forEach((t) => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    $("tags").appendChild(li);
+  });
+  $("dl-escritorio").href = carpeta + "escritorio.jpg";
+  $("dl-escritorio").setAttribute("download", f.id.replace("/", "-") + "-escritorio.jpg");
+  $("peso-escritorio").textContent = f.escritorio;
+  $("dl-mobile").href = carpeta + "mobile.jpg";
+  $("dl-mobile").setAttribute("download", f.id.replace("/", "-") + "-mobile.jpg");
+  $("peso-mobile").textContent = f.mobile;
+})();
+</script>
+</body>
+</html>

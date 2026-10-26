@@ -93,8 +93,6 @@ header { display: flex; justify-content: space-between; align-items: center; gap
   animation: giro .8s linear infinite;
 }
 .frame.listo .cargando { opacity: 0; pointer-events: none; }
-.frame.error .cargando { animation: none; }
-.frame.error .cargando::before { display: none; }
 @keyframes brillo { from { background-position: 100% 0; } to { background-position: -150% 0; } }
 @keyframes giro { to { transform: rotate(360deg); } }
 figcaption { font: 400 12px/1.4 var(--mono); color: var(--muted); letter-spacing: .02em; }
@@ -179,7 +177,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
 <div class="wrap" id="app">
 
   <header>
-    <a class="logo" href="./">wallpapers<span>/</span>lab</a>
+    <a class="logo" id="logo" href="./">wallpapers<span>/</span>lab</a>
     <a class="top-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">@wallpaperslabs</a>
   </header>
 
@@ -215,7 +213,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
     <h1>No encontramos ese fondo</h1>
     <p class="lead">Puede que el link esté incompleto o que el fondo ya no esté disponible.</p>
     <div class="vacio-acciones">
-      <a class="btn-principal" href="./">
+      <a class="btn-principal" id="ver-mas" href="./">
         Ver más fondos
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
       </a>
@@ -246,7 +244,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
 </div>
 <script>
 // Muestra el fondo que pide la URL: index.html?wallpaper=galaxy/galaxia-1
-// Sin parámetro muestra el primero de wallpapers.json (el más nuevo arriba).
+// Sin parámetro, o si el fondo no existe, muestra la pantalla de error.
 (async function () {
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
@@ -255,19 +253,30 @@ footer a { text-decoration: none; color: var(--accent-text); }
   try {
     fondos = await (await fetch("wallpapers.json", { cache: "no-cache" })).json();
   } catch (e) {}
-  const f = pedido ? fondos.find((x) => x.id === pedido) : fondos[0];
+  const f = pedido ? fondos.find((x) => x.id === pedido) : null;
+
+  // El logo y "Ver más fondos" llevan al fondo más nuevo (el primero de wallpapers.json).
+  if (fondos[0]) {
+    const masNuevo = "?wallpaper=" + encodeURIComponent(fondos[0].id).replace(/%2F/g, "/");
+    $("logo").href = masNuevo;
+    $("ver-mas").href = masNuevo;
+  } else {
+    $("ver-mas").remove();
+  }
 
   const raiz = document.documentElement;
   raiz.classList.remove("resolviendo");
 
-  if (!f) {
-    // Pantalla de error: solo el mensaje y la salida, nada de la vista ni las descargas.
-    $("stage").remove();
-    $("info").remove();
-    $("follow").remove();
+  // Pantalla de error: solo el mensaje y la salida, nada de la vista ni las descargas.
+  const mostrarError = () => {
+    ["stage", "info", "follow"].forEach((id) => $(id) && $(id).remove());
     $("vacio").hidden = false;
     raiz.classList.add("estado-error");
     document.title = "Fondo no encontrado · wallpapers/lab";
+  };
+
+  if (!f) {
+    mostrarError();
     return;
   }
 
@@ -275,10 +284,8 @@ footer a { text-decoration: none; color: var(--accent-text); }
   document.title = f.titulo + " · wallpapers/lab";
   const img = $("vista");
   img.onload = () => $("frame").classList.add("listo");
-  img.onerror = () => {
-    $("frame").classList.add("error");
-    $("cargando").textContent = "No se pudo cargar la vista previa";
-  };
+  // Si el fondo figura en la lista pero sus archivos no están, también es error.
+  img.onerror = mostrarError;
   img.src = carpeta + "vista.jpg";
   if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
   $("vista").alt = f.titulo + " en formato escritorio";

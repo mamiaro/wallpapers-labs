@@ -8,7 +8,7 @@
 <meta name="description" content="Arte abstracto para tu pantalla. Wallpapers gratis en alta resolución, para escritorio y mobile.">
 <meta property="og:title" content="wallpapers/lab · fondos gratis">
 <meta property="og:description" content="Arte abstracto para tu pantalla. Gratis, en alta resolución, para escritorio y mobile.">
-<meta property="og:image" content="galaxy/galaxia-1/vista.jpg">
+<meta property="og:image" content="logo-prisma.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -246,6 +246,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
 </div>
 <script>
 // Muestra el fondo que pide la URL: index.html?wallpaper=galaxy/galaxia-1
+// Los archivos de cada fondo viven en wallpapers/<id>/.
 // Sin parámetro, o si el fondo no existe, muestra la pantalla de error.
 (async function () {
   const $ = (id) => document.getElementById(id);
@@ -282,7 +283,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
     return;
   }
 
-  const carpeta = f.id + "/";
+  const carpeta = "wallpapers/" + f.id + "/";
   document.title = f.titulo + " · wallpapers/lab";
   const img = $("vista");
   img.onload = () => $("frame").classList.add("listo");

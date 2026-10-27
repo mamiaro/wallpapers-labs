@@ -8,6 +8,8 @@ Hacemos arte abstracto para tu pantalla: fondos de pantalla gratis, en alta reso
 
 Cada fondo nuevo se publica en X, en [@wallpaperslabs](https://x.com/wallpaperslabs), con su link de descarga. Seguinos para ver el próximo antes que nadie.
 
+☕ Próximamente en [Cafecito](https://cafecito.app/wallpaperslabs): colecciones de wallpapers con variantes únicas.
+
 ## Apoyar el proyecto
 
 Si algún fondo te gustó y querés dar una mano, podés invitarnos un [Cafecito](https://cafecito.app/wallpaperslabs). ☕

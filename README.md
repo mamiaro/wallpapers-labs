@@ -22,7 +22,6 @@ Si algún fondo te gustó y querés dar una mano, podés invitarnos un [Cafecito
   - `?collection=galaxy&wallpaper=2`: el detalle de un fondo, con sus descargas.
 - `wallpapers.json`: las colecciones publicadas; la más nueva va primero.
 - Las imágenes no viven en el repo: cada colección es una [release](https://github.com/mamiaro/wallpapersLabs/releases) con el mismo nombre, con `<coleccion>-<n>-vista.jpg`, `<coleccion>-<n>-escritorio.jpg` y `<coleccion>-<n>-mobile.jpg`.
-- `herramientas/subir-coleccion/`: doble clic en `subir-coleccion.command` para subir una carpeta de fondos (crea la release, sube los archivos y actualiza `wallpapers.json`). Necesita [GitHub CLI](https://cli.github.com) con `gh auth login`.
 - Logo y favicons de la página, en la raíz.
 
 Los fondos son gratis para uso personal.

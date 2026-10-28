@@ -299,7 +299,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
 <script>
 // Arma la página desde la URL:
 //   ?collection=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
-//   ?collection=galaxy                    la colección entera, del más nuevo al más viejo
+//   ?collection=galaxy                    la colección entera, del 1 en adelante
 //   ?collection=galaxy&wallpaper=2        el detalle de ese fondo
 // Cada colección es una release de GitHub cuyo tag es el nombre de la colección. No hay lista
 // aparte: la página le pide a la API de GitHub el título, la fecha y los archivos de la release.
@@ -397,8 +397,8 @@ footer a { text-decoration: none; color: var(--accent-text); }
   const existe = (n) => !release || (fondos[n] && fondos[n].vista);
   let lista;
   if (pedidos.length) lista = pedidos.filter(existe);
-  else if (release) lista = Object.keys(fondos).filter(existe).sort((a, b) => b - a);
-  else lista = Array.from({ length: MAXIMO_SIN_API }, (_, i) => String(MAXIMO_SIN_API - i));
+  else if (release) lista = Object.keys(fondos).filter(existe).sort((a, b) => a - b);
+  else lista = Array.from({ length: MAXIMO_SIN_API }, (_, i) => String(i + 1));
   if (!lista.length) {
     mostrarError();
     return;

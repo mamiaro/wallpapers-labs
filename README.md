@@ -21,7 +21,7 @@ Si algún fondo te gustó y querés dar una mano, podés invitarnos un [Cafecito
   - `?collection=galaxy`: la colección entera.
   - `?collection=galaxy&wallpaper=2`: el detalle de un fondo, con sus descargas.
 - `wallpapers.json`: las colecciones publicadas; la más nueva va primero.
-- Las imágenes no viven en el repo: cada colección es una [release](https://github.com/mamiaro/wallpapersLabs/releases) con el mismo nombre, con `<coleccion>-<n>-vista.jpg`, `<coleccion>-<n>-escritorio.jpg` y `<coleccion>-<n>-mobile.jpg`.
+- Las imágenes no viven en el repo: cada colección es una [release](https://github.com/mamiaro/wallpapersLabs/releases) con el mismo nombre, con `wallpaper-<n>-studio.png` (escritorio), `wallpaper-<n>-mobile.png` (mobile), `wallpaper-<n>-studio-preview.jpg` (la vista de la landing) y `wallpaper-<n>-mobile-preview.jpg`.
 - Logo y favicons de la página, en la raíz.
 
 Los fondos son gratis para uso personal.

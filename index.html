@@ -163,6 +163,24 @@ footer a { text-decoration: none; color: var(--accent-text); }
 }
 .btn-cafecito:hover { filter: brightness(.92); }
 
+/* Colección: fecha, nombre y grilla de vistas, sin títulos. */
+.coleccion { display: flex; flex-direction: column; gap: 24px; }
+.coleccion-cabeza { display: flex; flex-direction: column; gap: 8px; }
+.fecha { font: 500 12px/1 var(--mono); color: var(--accent-text); letter-spacing: .06em; text-transform: uppercase; }
+.coleccion h1 { margin: 0; }
+.grilla { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.tarjeta {
+  display: block; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface);
+}
+.tarjeta img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.tarjeta:hover img { transform: scale(1.04); }
+.volver { align-self: flex-start; font: 500 13px/1 var(--mono); color: var(--accent-text); text-decoration: none; }
+.volver:hover { text-decoration: underline; }
+@media (max-width: 720px) {
+  .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+}
+
 /* Mientras se lee wallpapers.json no se muestra nada del estado normal. */
 .resolviendo .normal { visibility: hidden; }
 [hidden] { display: none !important; }
@@ -191,7 +209,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
   .info { grid-template-columns: 1fr; gap: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dl, .frame img, .cargando { transition: none; }
+  .dl, .frame img, .cargando, .tarjeta img { transition: none; }
   .cargando, .cargando::before { animation: none; }
 }
 </style>
@@ -203,6 +221,16 @@ footer a { text-decoration: none; color: var(--accent-text); }
     <a class="logo" id="logo" href="./"><img src="logo-prisma.png" width="116" height="102" alt=""><span>wallpapers<b>/</b>lab</span></a>
     <a class="top-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">@wallpaperslabs</a>
   </header>
+
+  <section class="coleccion" id="coleccion" hidden>
+    <div class="coleccion-cabeza">
+      <span class="fecha" id="col-fecha"></span>
+      <h1 id="col-nombre"></h1>
+    </div>
+    <div class="grilla" id="grilla"></div>
+  </section>
+
+  <a class="volver normal" id="volver" href="./" hidden>← Volver</a>
 
   <figure class="stage normal" id="stage">
     <div class="frame" id="frame">
@@ -220,11 +248,11 @@ footer a { text-decoration: none; color: var(--accent-text); }
     </div>
 
     <div class="downloads">
-      <a class="dl" id="dl-escritorio" href="#" download>
+      <a class="dl" id="dl-escritorio" href="#">
         <span><strong>Descargar para escritorio</strong><small id="peso-escritorio"></small></span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
       </a>
-      <a class="dl" id="dl-mobile" href="#" download>
+      <a class="dl" id="dl-mobile" href="#">
         <span><strong>Descargar para mobile</strong><small id="peso-mobile"></small></span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
       </a>
@@ -248,7 +276,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
   </section>
 
   <section class="follow normal" id="follow">
-    <p><strong>¿Te gustó? Hay un fondo nuevo cada tanto.</strong><span>Seguinos en X para ver el próximo antes que nadie.</span></p>
+    <p><strong>¿Te gustó? Hay fondos nuevos cada tanto.</strong><span>Seguinos en X para ver los próximos antes que nadie.</span></p>
     <a class="btn-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3Zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43Z"/></svg>
       Seguir en X
@@ -269,24 +297,44 @@ footer a { text-decoration: none; color: var(--accent-text); }
 
 </div>
 <script>
-// Muestra el fondo que pide la URL: index.html?wallpaper=galaxy/galaxia-1
-// Los archivos de cada fondo viven en wallpapers/<id>/.
-// Sin parámetro, o si el fondo no existe, muestra la pantalla de error.
+// Arma la página desde la URL:
+//   ?collection=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
+//   ?collection=galaxy                    la colección entera, del más nuevo al más viejo
+//   ?collection=galaxy&wallpaper=2        el detalle de ese fondo
+// Cada colección es una release de GitHub con el mismo nombre; sus archivos se llaman
+// <coleccion>-<n>-vista.jpg, <coleccion>-<n>-escritorio.jpg y <coleccion>-<n>-mobile.jpg.
+// Sin colección, o si no existe ninguno de los fondos pedidos, muestra la pantalla de error.
 (async function () {
+  const RELEASES = "https://github.com/mamiaro/wallpapersLabs/releases/download/";
+  const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const pedido = params.get("wallpaper") || location.hash.slice(1);
-  let fondos = [];
+  let colecciones = {};
   try {
-    fondos = await (await fetch("wallpapers.json", { cache: "no-cache" })).json();
+    colecciones = await (await fetch("wallpapers.json", { cache: "no-cache" })).json();
   } catch (e) {}
-  const f = pedido ? fondos.find((x) => x.id === pedido) : null;
+  if (!colecciones || Array.isArray(colecciones)) colecciones = {};
 
-  // El logo y "Ver más fondos" llevan al fondo más nuevo (el primero de wallpapers.json).
-  if (fondos[0]) {
-    const masNuevo = "?wallpaper=" + encodeURIComponent(fondos[0].id).replace(/%2F/g, "/");
-    $("logo").href = masNuevo;
-    $("ver-mas").href = masNuevo;
+  const slug = (params.get("collection") || "").toLowerCase();
+  const col = Object.prototype.hasOwnProperty.call(colecciones, slug) ? colecciones[slug] : null;
+  const fondos = (col && col.fondos) || {};
+  const pedidos = (params.get("wallpaper") || "").split(/[\/,]/).map((s) => s.trim()).filter(Boolean);
+  const lista = pedidos.length
+    ? pedidos.filter((n) => Object.prototype.hasOwnProperty.call(fondos, n))
+    : Object.keys(fondos).sort((a, b) => Number(b) - Number(a));
+
+  const archivo = (n, tipo) => RELEASES + encodeURIComponent(slug) + "/" + encodeURIComponent(slug + "-" + n + "-" + tipo + ".jpg");
+  const linkColeccion = (s) => "?collection=" + encodeURIComponent(s);
+  const fechaLinda = (iso) => {
+    const [a, m, d] = String(iso || "").split("-");
+    return d ? Number(d) + " " + MESES[Number(m) - 1] + " " + a : "";
+  };
+
+  // El logo y "Ver más fondos" llevan a la colección más nueva (la primera de wallpapers.json).
+  const masNueva = Object.keys(colecciones)[0];
+  if (masNueva) {
+    $("logo").href = linkColeccion(masNueva);
+    $("ver-mas").href = linkColeccion(masNueva);
   } else {
     $("ver-mas").remove();
   }
@@ -296,40 +344,74 @@ footer a { text-decoration: none; color: var(--accent-text); }
 
   // Pantalla de error: solo el mensaje y la salida, nada de la vista ni las descargas.
   const mostrarError = () => {
-    ["stage", "info", "follow"].forEach((id) => $(id) && $(id).remove());
+    ["coleccion", "volver", "stage", "info", "follow"].forEach((id) => $(id) && $(id).remove());
     $("vacio").hidden = false;
     raiz.classList.add("estado-error");
     document.title = "Fondo no encontrado · wallpapers/lab";
   };
 
-  if (!f) {
+  if (!col || !lista.length) {
     mostrarError();
     return;
   }
 
-  const carpeta = "wallpapers/" + f.id + "/";
-  document.title = f.titulo + " · wallpapers/lab";
-  const img = $("vista");
-  img.onload = () => $("frame").classList.add("listo");
-  // Si el fondo figura en la lista pero sus archivos no están, también es error.
-  img.onerror = mostrarError;
-  img.src = carpeta + "vista.jpg";
-  if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
-  $("vista").alt = f.titulo + " en formato escritorio";
-  $("titulo").textContent = f.titulo;
-  $("descripcion").textContent = f.descripcion;
-  $("tags").innerHTML = "";
-  (f.tags || []).forEach((t) => {
-    const li = document.createElement("li");
-    li.textContent = t;
-    $("tags").appendChild(li);
+  const nombre = col.nombre || slug;
+
+  // Un solo fondo pedido: el detalle.
+  if (pedidos.length === 1) {
+    const n = lista[0];
+    const f = fondos[n];
+    const titulo = f.titulo || nombre + " " + n;
+    ["coleccion"].forEach((id) => $(id).remove());
+    const volver = $("volver");
+    volver.hidden = false;
+    volver.href = linkColeccion(slug);
+    volver.textContent = "← Ver " + nombre;
+    document.title = titulo + " · wallpapers/lab";
+    const img = $("vista");
+    img.onload = () => $("frame").classList.add("listo");
+    // Si el fondo figura en la lista pero sus archivos no están, también es error.
+    img.onerror = mostrarError;
+    img.src = archivo(n, "vista");
+    if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
+    img.alt = titulo + " en formato escritorio";
+    $("titulo").textContent = titulo;
+    $("descripcion").textContent = f.descripcion || "Fondo de la colección " + nombre + ".";
+    $("tags").innerHTML = "";
+    (f.tags || []).forEach((t) => {
+      const li = document.createElement("li");
+      li.textContent = t;
+      $("tags").appendChild(li);
+    });
+    $("dl-escritorio").href = archivo(n, "escritorio");
+    $("peso-escritorio").textContent = f.escritorio || "";
+    $("dl-mobile").href = archivo(n, "mobile");
+    $("peso-mobile").textContent = f.mobile || "";
+    return;
+  }
+
+  // Varios fondos, o la colección entera: fecha, nombre y grilla.
+  ["volver", "stage", "info"].forEach((id) => $(id).remove());
+  document.title = nombre + " · wallpapers/lab";
+  $("coleccion").hidden = false;
+  $("col-nombre").textContent = nombre;
+  const fechas = lista.map((n) => fondos[n].fecha).filter(Boolean).sort();
+  $("col-fecha").textContent = fechaLinda(fechas[fechas.length - 1]);
+  lista.forEach((n) => {
+    const a = document.createElement("a");
+    a.className = "tarjeta";
+    a.href = linkColeccion(slug) + "&wallpaper=" + encodeURIComponent(n);
+    a.setAttribute("aria-label", "Ver " + (fondos[n].titulo || nombre + " " + n));
+    const img = document.createElement("img");
+    img.src = archivo(n, "vista");
+    img.alt = "";
+    img.width = 1600;
+    img.height = 900;
+    img.loading = "lazy";
+    img.onerror = () => a.remove();
+    a.appendChild(img);
+    $("grilla").appendChild(a);
   });
-  $("dl-escritorio").href = carpeta + "escritorio.jpg";
-  $("dl-escritorio").setAttribute("download", f.id.replace("/", "-") + "-escritorio.jpg");
-  $("peso-escritorio").textContent = f.escritorio;
-  $("dl-mobile").href = carpeta + "mobile.jpg";
-  $("dl-mobile").setAttribute("download", f.id.replace("/", "-") + "-mobile.jpg");
-  $("peso-mobile").textContent = f.mobile;
 })();
 </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ce54d30d76a74da5a1a5a57b6dd39a39"}'></script><!-- End Cloudflare Web Analytics -->

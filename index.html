@@ -181,7 +181,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
   .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 }
 
-/* Mientras se lee wallpapers.json no se muestra nada del estado normal. */
+/* Mientras se lee la release no se muestra nada del estado normal. */
 .resolviendo .normal { visibility: hidden; }
 [hidden] { display: none !important; }
 .estado-error .wrap { min-height: 100vh; min-height: 100dvh; }
@@ -301,70 +301,119 @@ footer a { text-decoration: none; color: var(--accent-text); }
 //   ?collection=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
 //   ?collection=galaxy                    la colección entera, del más nuevo al más viejo
 //   ?collection=galaxy&wallpaper=2        el detalle de ese fondo
-// Cada colección es una release de GitHub con el mismo nombre; sus archivos se llaman
-// wallpaper-<n>-studio-preview.jpg (la vista), wallpaper-<n>-studio.png (escritorio)
-// y wallpaper-<n>-mobile.png (mobile). wallpaper-<n>-mobile-preview.jpg también va, aunque la landing no lo usa.
-// Sin colección, o si no existe ninguno de los fondos pedidos, muestra la pantalla de error.
+// Cada colección es una release de GitHub cuyo tag es el nombre de la colección. No hay lista
+// aparte: la página le pide a la API de GitHub el título, la fecha y los archivos de la release.
+// Los archivos de cada fondo se llaman wallpaper-<n>-studio-preview.jpg (la vista),
+// wallpaper-<n>-studio.png (escritorio) y wallpaper-<n>-mobile.png (mobile).
+// Si la API no responde (tiene un límite de consultas por visitante), igual se arma con los
+// nombres de archivo, sin fecha ni pesos.
 (async function () {
-  const RELEASES = "https://github.com/mamiaro/wallpapersLabs/releases/download/";
+  const REPO = "mamiaro/wallpapersLabs";
+  const DESCARGAS = "https://github.com/" + REPO + "/releases/download/";
+  const API = "https://api.github.com/repos/" + REPO + "/releases/";
+  const NOMBRES = { vista: "studio-preview.jpg", escritorio: "studio.png", mobile: "mobile.png" };
+  const MAXIMO_SIN_API = 40;
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  let colecciones = {};
-  try {
-    colecciones = await (await fetch("wallpapers.json", { cache: "no-cache" })).json();
-  } catch (e) {}
-  if (!colecciones || Array.isArray(colecciones)) colecciones = {};
+  const slug = (params.get("collection") || "").trim();
+  const pedidos = (params.get("wallpaper") || "").split(/[\/,]/).map((s) => s.trim()).filter((s) => /^\d+$/.test(s));
 
-  const slug = (params.get("collection") || "").toLowerCase();
-  const col = Object.prototype.hasOwnProperty.call(colecciones, slug) ? colecciones[slug] : null;
-  const fondos = (col && col.fondos) || {};
-  const pedidos = (params.get("wallpaper") || "").split(/[\/,]/).map((s) => s.trim()).filter(Boolean);
-  const lista = pedidos.length
-    ? pedidos.filter((n) => Object.prototype.hasOwnProperty.call(fondos, n))
-    : Object.keys(fondos).sort((a, b) => Number(b) - Number(a));
-
-  const NOMBRES = { vista: "studio-preview.jpg", escritorio: "studio.png", mobile: "mobile.png" };
-  const archivo = (n, tipo) => RELEASES + encodeURIComponent(slug) + "/" + encodeURIComponent("wallpaper-" + n + "-" + NOMBRES[tipo]);
-  const linkColeccion = (s) => "?collection=" + encodeURIComponent(s);
-  const fechaLinda = (iso) => {
-    const [a, m, d] = String(iso || "").split("-");
-    return d ? Number(d) + " " + MESES[Number(m) - 1] + " " + a : "";
-  };
-
-  // El logo y "Ver más fondos" llevan a la colección más nueva (la primera de wallpapers.json).
-  const masNueva = Object.keys(colecciones)[0];
-  if (masNueva) {
-    $("logo").href = linkColeccion(masNueva);
-    $("ver-mas").href = linkColeccion(masNueva);
-  } else {
-    $("ver-mas").remove();
+  // Pide una release a la API, con caché de 10 minutos para no gastar consultas al navegar.
+  // Devuelve la release, null si no existe, o undefined si la API no respondió.
+  async function pedirRelease(ruta) {
+    const clave = "release:" + ruta;
+    try {
+      const guardada = JSON.parse(sessionStorage.getItem(clave) || "null");
+      if (guardada && Date.now() - guardada.t < 600000) return guardada.r;
+    } catch (e) {}
+    try {
+      const resp = await fetch(API + ruta, { headers: { Accept: "application/vnd.github+json" } });
+      if (resp.status === 404) return null;
+      if (!resp.ok) return undefined;
+      const r = await resp.json();
+      const liviana = {
+        tag: r.tag_name, nombre: r.name, fecha: r.published_at,
+        archivos: (r.assets || []).map((a) => ({ nombre: a.name, peso: a.size, fecha: a.created_at })),
+      };
+      try { sessionStorage.setItem(clave, JSON.stringify({ t: Date.now(), r: liviana })); } catch (e) {}
+      return liviana;
+    } catch (e) {
+      return undefined;
+    }
   }
 
-  const raiz = document.documentElement;
-  raiz.classList.remove("resolviendo");
+  const archivo = (n, tipo) => DESCARGAS + encodeURIComponent(slug) + "/" + encodeURIComponent("wallpaper-" + n + "-" + NOMBRES[tipo]);
+  const linkColeccion = (s) => "?collection=" + encodeURIComponent(s);
+  const fechaLinda = (iso) => {
+    const d = iso ? new Date(iso) : null;
+    return d && !isNaN(d) ? d.getDate() + " " + MESES[d.getMonth()] + " " + d.getFullYear() : "";
+  };
+  const pesoLindo = (bytes) => {
+    const mb = bytes / 1e6;
+    return "PNG · " + (mb >= 10 ? Math.round(mb) : mb.toFixed(1).replace(".", ",")) + " MB";
+  };
 
+  const raiz = document.documentElement;
   // Pantalla de error: solo el mensaje y la salida, nada de la vista ni las descargas.
-  const mostrarError = () => {
+  const mostrarError = async () => {
     ["coleccion", "volver", "stage", "info", "follow"].forEach((id) => $(id) && $(id).remove());
     $("vacio").hidden = false;
     raiz.classList.add("estado-error");
+    raiz.classList.remove("resolviendo");
     document.title = "Fondo no encontrado · wallpapers/lab";
+    // "Ver más fondos" lleva a la colección más nueva.
+    const ultima = await pedirRelease("latest");
+    if (ultima && ultima.tag) {
+      $("ver-mas").href = linkColeccion(ultima.tag);
+      $("logo").href = linkColeccion(ultima.tag);
+    } else {
+      $("ver-mas").remove();
+    }
   };
 
-  if (!col || !lista.length) {
+  if (!slug) {
+    mostrarError();
+    return;
+  }
+  const release = await pedirRelease("tags/" + encodeURIComponent(slug));
+  if (release === null) {
     mostrarError();
     return;
   }
 
-  const nombre = col.nombre || slug;
+  // Fondos de la release: número, fecha y pesos, a partir de los nombres de archivo.
+  const fondos = {};
+  if (release) {
+    release.archivos.forEach((a) => {
+      const m = /^wallpaper-(\d+)-(studio-preview\.jpg|studio\.png|mobile\.png)$/.exec(a.nombre);
+      if (!m) return;
+      const f = (fondos[m[1]] = fondos[m[1]] || {});
+      if (m[2] === "studio-preview.jpg") f.vista = true;
+      if (m[2] === "studio.png") { f.escritorio = pesoLindo(a.peso); f.fecha = a.fecha; }
+      if (m[2] === "mobile.png") f.mobile = pesoLindo(a.peso);
+    });
+  }
+  const existe = (n) => !release || (fondos[n] && fondos[n].vista);
+  let lista;
+  if (pedidos.length) lista = pedidos.filter(existe);
+  else if (release) lista = Object.keys(fondos).filter(existe).sort((a, b) => b - a);
+  else lista = Array.from({ length: MAXIMO_SIN_API }, (_, i) => String(MAXIMO_SIN_API - i));
+  if (!lista.length) {
+    mostrarError();
+    return;
+  }
+
+  const nombre = (release && release.nombre) || slug.charAt(0).toUpperCase() + slug.slice(1);
+  $("logo").href = linkColeccion(slug);
+  raiz.classList.remove("resolviendo");
 
   // Un solo fondo pedido: el detalle.
   if (pedidos.length === 1) {
     const n = lista[0];
-    const f = fondos[n];
-    const titulo = f.titulo || nombre + " " + n;
-    ["coleccion"].forEach((id) => $(id).remove());
+    const f = fondos[n] || {};
+    const titulo = nombre + " " + n;
+    $("coleccion").remove();
     const volver = $("volver");
     volver.hidden = false;
     volver.href = linkColeccion(slug);
@@ -372,19 +421,19 @@ footer a { text-decoration: none; color: var(--accent-text); }
     document.title = titulo + " · wallpapers/lab";
     const img = $("vista");
     img.onload = () => $("frame").classList.add("listo");
-    // Si el fondo figura en la lista pero sus archivos no están, también es error.
+    // Si la vista no está en la release, también es error.
     img.onerror = mostrarError;
     img.src = archivo(n, "vista");
     if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
     img.alt = titulo + " en formato escritorio";
     $("titulo").textContent = titulo;
-    $("descripcion").textContent = f.descripcion || "Fondo de la colección " + nombre + ".";
-    $("tags").innerHTML = "";
-    (f.tags || []).forEach((t) => {
+    $("descripcion").textContent = "Fondo de la colección " + nombre + ".";
+    const fecha = fechaLinda(f.fecha);
+    if (fecha) {
       const li = document.createElement("li");
-      li.textContent = t;
+      li.textContent = fecha;
       $("tags").appendChild(li);
-    });
+    }
     $("dl-escritorio").href = archivo(n, "escritorio");
     $("peso-escritorio").textContent = f.escritorio || "";
     $("dl-mobile").href = archivo(n, "mobile");
@@ -397,20 +446,23 @@ footer a { text-decoration: none; color: var(--accent-text); }
   document.title = nombre + " · wallpapers/lab";
   $("coleccion").hidden = false;
   $("col-nombre").textContent = nombre;
-  const fechas = lista.map((n) => fondos[n].fecha).filter(Boolean).sort();
-  $("col-fecha").textContent = fechaLinda(fechas[fechas.length - 1]);
+  const fechas = lista.map((n) => fondos[n] && fondos[n].fecha).filter(Boolean).sort();
+  $("col-fecha").textContent = fechaLinda(fechas[fechas.length - 1] || (release && release.fecha));
   lista.forEach((n) => {
     const a = document.createElement("a");
     a.className = "tarjeta";
-    a.href = linkColeccion(slug) + "&wallpaper=" + encodeURIComponent(n);
-    a.setAttribute("aria-label", "Ver " + (fondos[n].titulo || nombre + " " + n));
+    a.href = linkColeccion(slug) + "&wallpaper=" + n;
+    a.setAttribute("aria-label", "Ver " + nombre + " " + n);
     const img = document.createElement("img");
     img.src = archivo(n, "vista");
     img.alt = "";
     img.width = 1600;
     img.height = 900;
     img.loading = "lazy";
-    img.onerror = () => a.remove();
+    img.onerror = () => {
+      a.remove();
+      if (!$("grilla").children.length) mostrarError();
+    };
     a.appendChild(img);
     $("grilla").appendChild(a);
   });

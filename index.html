@@ -76,6 +76,21 @@ header { display: flex; justify-content: space-between; align-items: center; gap
 .logo b { font-weight: inherit; color: var(--accent-text); }
 .top-x { font: 500 13px/1 var(--mono); color: var(--muted); text-decoration: none; }
 .top-x:hover { color: var(--fg); }
+.header-der { display: flex; align-items: center; gap: 14px; }
+.idiomas { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 2px; }
+.idiomas button {
+  border: 0; background: transparent; color: var(--muted); cursor: pointer;
+  font: 500 11px/1 var(--mono); letter-spacing: .06em; padding: 6px 9px; border-radius: var(--r-sm);
+}
+.idiomas button:hover { color: var(--fg); }
+.idiomas button[aria-pressed="true"] {
+  background: linear-gradient(180deg, var(--btn-top), var(--btn-bottom)); color: var(--btn-fg);
+  box-shadow: inset 0 0 0 1px var(--btn-edge);
+}
+.idiomas button:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+@media (max-width: 420px) {
+  .top-x { display: none; }
+}
 
 .stage { margin: 0; display: flex; flex-direction: column; gap: 8px; }
 .frame {
@@ -219,7 +234,13 @@ footer a { text-decoration: none; color: var(--accent-text); }
 
   <header>
     <a class="logo" id="logo" href="./"><img src="logo-prisma.png" width="116" height="102" alt=""><span>wallpapers<b>/</b>lab</span></a>
-    <a class="top-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">@wallpaperslabs</a>
+    <div class="header-der">
+      <a class="top-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">@wallpaperslabs</a>
+      <div class="idiomas" role="group" aria-label="Idioma / Language">
+        <button type="button" data-idioma="es" aria-pressed="false">ES</button>
+        <button type="button" data-idioma="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
   </header>
 
   <section class="coleccion" id="coleccion" hidden>
@@ -235,67 +256,143 @@ footer a { text-decoration: none; color: var(--accent-text); }
   <figure class="stage normal" id="stage">
     <div class="frame" id="frame">
       <img id="vista" width="1600" height="900" alt="">
-      <div class="cargando" id="cargando" role="status">Cargando fondo…</div>
+      <div class="cargando" id="cargando" role="status" data-i18n="cargando">Cargando fondo…</div>
     </div>
-    <figcaption>Escritorio · 16:9</figcaption>
+    <figcaption data-i18n="formato">Escritorio · 16:9</figcaption>
   </figure>
 
   <section class="info normal" id="info">
     <div>
       <h1 id="titulo">&nbsp;</h1>
-      <p class="lead"><span id="descripcion"></span> Gratis, en alta resolución, sin registro y sin marca de agua.</p>
+      <p class="lead"><span id="descripcion"></span> <span data-i18n="gratis">Gratis, en alta resolución, sin registro y sin marca de agua.</span></p>
       <ul class="tags" id="tags"></ul>
     </div>
 
     <div class="downloads">
       <a class="dl" id="dl-escritorio" href="#">
-        <span><strong>Descargar para escritorio</strong><small id="peso-escritorio"></small></span>
+        <span><strong data-i18n="dlEscritorio">Descargar para escritorio</strong><small id="peso-escritorio"></small></span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
       </a>
       <a class="dl" id="dl-mobile" href="#">
-        <span><strong>Descargar para mobile</strong><small id="peso-mobile"></small></span>
+        <span><strong data-i18n="dlMobile">Descargar para mobile</strong><small id="peso-mobile"></small></span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
       </a>
     </div>
   </section>
 
   <section class="vacio" id="vacio" hidden>
-    <span class="vacio-marca">404 · fondo no encontrado</span>
-    <h1>No encontramos ese fondo</h1>
-    <p class="lead">Puede que el link esté incompleto o que el fondo ya no esté disponible.</p>
+    <span class="vacio-marca" data-i18n="marca404">404 · fondo no encontrado</span>
+    <h1 data-i18n="titulo404">No encontramos ese fondo</h1>
+    <p class="lead" data-i18n="texto404">Puede que el link esté incompleto o que el fondo ya no esté disponible.</p>
     <div class="vacio-acciones">
       <a class="btn-principal" id="ver-mas" href="./">
-        Ver más fondos
+        <span data-i18n="verMas">Ver más fondos</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
       </a>
       <a class="btn-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3Zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43Z"/></svg>
-        Ver en X
+        <span data-i18n="verEnX">Ver en X</span>
       </a>
     </div>
   </section>
 
   <section class="follow normal" id="follow">
-    <p><strong>¿Te gustó? Hay fondos nuevos cada tanto.</strong><span>Seguinos en X para ver los próximos antes que nadie.</span></p>
+    <p><strong data-i18n="seguirTitulo">¿Te gustó? Hay fondos nuevos cada tanto.</strong><span data-i18n="seguirTexto">Seguinos en X para ver los próximos antes que nadie.</span></p>
     <a class="btn-x" href="https://x.com/wallpaperslabs" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.37 5.77L17.75 3Zm-1.08 16.17h1.7L7.4 4.74H5.58l11.09 14.43Z"/></svg>
-      Seguir en X
+      <span data-i18n="seguirBoton">Seguir en X</span>
     </a>
   </section>
 
   <section class="cafecito normal">
-    <p><strong>☕ Próximamente en Cafecito</strong><span>Colecciones de wallpapers con variantes únicas.</span></p>
-    <a class="btn-cafecito" href="https://cafecito.app/wallpaperslabs" target="_blank" rel="noopener">Ir a Cafecito</a>
+    <p><strong data-i18n="cafeTitulo">☕ Próximamente en Cafecito</strong><span data-i18n="cafeTexto">Colecciones de wallpapers con variantes únicas.</span></p>
+    <a class="btn-cafecito" href="https://cafecito.app/wallpaperslabs" target="_blank" rel="noopener" data-i18n="cafeBoton">Ir a Cafecito</a>
   </section>
 
   <footer>
-    <span>Gratis para uso personal.</span>
+    <span data-i18n="uso">Gratis para uso personal.</span>
     <nav>
       <a href="https://cafecito.app/wallpaperslabs" target="_blank" rel="noopener">Cafecito</a>
     </nav>
   </footer>
 
 </div>
+<script>
+// Idioma: castellano o inglés. Manda lo que eligió la persona con el switch; si no eligió,
+// castellano cuando el navegador está en español o la zona horaria es de un país hispanohablante,
+// e inglés en el resto. Los textos fijos llevan data-i18n; los que arma la página usan I18N.t().
+window.I18N = (function () {
+  const TEXTOS = {
+    es: {
+      cargando: "Cargando fondo…", formato: "Escritorio · 16:9",
+      gratis: "Gratis, en alta resolución, sin registro y sin marca de agua.",
+      dlEscritorio: "Descargar para escritorio", dlMobile: "Descargar para mobile",
+      marca404: "404 · fondo no encontrado", titulo404: "No encontramos ese fondo",
+      texto404: "Puede que el link esté incompleto o que el fondo ya no esté disponible.",
+      verMas: "Ver más fondos", verEnX: "Ver en X",
+      seguirTitulo: "¿Te gustó? Hay fondos nuevos cada tanto.",
+      seguirTexto: "Seguinos en X para ver los próximos antes que nadie.", seguirBoton: "Seguir en X",
+      cafeTitulo: "☕ Próximamente en Cafecito", cafeTexto: "Colecciones de wallpapers con variantes únicas.",
+      cafeBoton: "Ir a Cafecito", uso: "Gratis para uso personal.",
+      noEncontrado: "Fondo no encontrado", verColeccion: "← Ver {nombre}", ver: "Ver {nombre}",
+      deColeccion: "Fondo de la colección {nombre}.", alt: "{titulo} en formato escritorio",
+      meses: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
+    },
+    en: {
+      cargando: "Loading wallpaper…", formato: "Desktop · 16:9",
+      gratis: "Free, high resolution, no sign-up and no watermark.",
+      dlEscritorio: "Download for desktop", dlMobile: "Download for mobile",
+      marca404: "404 · wallpaper not found", titulo404: "We couldn't find that wallpaper",
+      texto404: "The link may be incomplete, or the wallpaper may no longer be available.",
+      verMas: "See more wallpapers", verEnX: "View on X",
+      seguirTitulo: "Like it? New wallpapers drop every so often.",
+      seguirTexto: "Follow us on X to see the next ones first.", seguirBoton: "Follow on X",
+      cafeTitulo: "☕ Coming soon to Cafecito", cafeTexto: "Wallpaper collections with unique variants.",
+      cafeBoton: "Go to Cafecito", uso: "Free for personal use.",
+      noEncontrado: "Wallpaper not found", verColeccion: "← See {nombre}", ver: "View {nombre}",
+      deColeccion: "From the {nombre} collection.", alt: "{titulo} in desktop format",
+      meses: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    },
+  };
+  const ZONAS_HISPANAS = /^(America\/(Argentina|Buenos_Aires|Cordoba|Catamarca|Jujuy|Mendoza|Montevideo|Santiago|Punta_Arenas|Asuncion|La_Paz|Lima|Bogota|Caracas|Guayaquil|Mexico_City|Monterrey|Merida|Cancun|Chihuahua|Ciudad_Juarez|Hermosillo|Mazatlan|Bahia_Banderas|Matamoros|Ojinaga|Tijuana|Guatemala|Tegucigalpa|El_Salvador|Managua|Costa_Rica|Panama|Havana|Santo_Domingo|Puerto_Rico)|Europe\/Madrid|Atlantic\/Canary|Africa\/(Ceuta|Malabo)|Pacific\/(Galapagos|Easter))/;
+
+  function idiomaInicial() {
+    try {
+      const guardado = localStorage.getItem("idioma");
+      if (guardado === "es" || guardado === "en") return guardado;
+    } catch (e) {}
+    const idiomas = navigator.languages || [navigator.language || ""];
+    if (idiomas.some((l) => /^es\b/i.test(l))) return "es";
+    try {
+      if (ZONAS_HISPANAS.test(Intl.DateTimeFormat().resolvedOptions().timeZone || "")) return "es";
+    } catch (e) {}
+    return "en";
+  }
+
+  let idioma = idiomaInicial();
+  const avisos = [];
+  const t = (clave, datos) => {
+    const texto = TEXTOS[idioma][clave];
+    return typeof texto === "string" && datos ? texto.replace(/\{(\w+)\}/g, (_, k) => datos[k]) : texto;
+  };
+  function aplicar() {
+    document.documentElement.lang = idioma;
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-idioma]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.idioma === idioma)));
+    avisos.forEach((fn) => fn());
+  }
+  document.querySelectorAll("[data-idioma]").forEach((b) => {
+    b.addEventListener("click", () => {
+      idioma = b.dataset.idioma;
+      try { localStorage.setItem("idioma", idioma); } catch (e) {}
+      aplicar();
+    });
+  });
+  aplicar();
+  // La página registra acá lo que tiene que volver a escribir cuando cambia el idioma.
+  return { t, alCambiar: (fn) => { avisos.push(fn); fn(); } };
+})();
+</script>
 <script>
 // Arma la página desde la URL:
 //   ?collection=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
@@ -313,7 +410,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
   const API = "https://api.github.com/repos/" + REPO + "/releases/";
   const NOMBRES = { vista: "studio-preview.jpg", escritorio: "studio.png", mobile: "mobile.png" };
   const MAXIMO_SIN_API = 40;
-  const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+  const t = window.I18N.t;
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
   const slug = (params.get("collection") || "").trim();
@@ -347,7 +444,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
   const linkColeccion = (s) => "?collection=" + encodeURIComponent(s);
   const fechaLinda = (iso) => {
     const d = iso ? new Date(iso) : null;
-    return d && !isNaN(d) ? d.getDate() + " " + MESES[d.getMonth()] + " " + d.getFullYear() : "";
+    return d && !isNaN(d) ? d.getDate() + " " + t("meses")[d.getMonth()] + " " + d.getFullYear() : "";
   };
   const pesoLindo = (bytes) => {
     const mb = bytes / 1e6;
@@ -361,7 +458,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
     $("vacio").hidden = false;
     raiz.classList.add("estado-error");
     raiz.classList.remove("resolviendo");
-    document.title = "Fondo no encontrado · wallpapers/lab";
+    window.I18N.alCambiar(() => { document.title = t("noEncontrado") + " · wallpapers/lab"; });
     // "Ver más fondos" lleva a la colección más nueva.
     const ultima = await pedirRelease("latest");
     if (ultima && ultima.tag) {
@@ -417,7 +514,6 @@ footer a { text-decoration: none; color: var(--accent-text); }
     const volver = $("volver");
     volver.hidden = false;
     volver.href = linkColeccion(slug);
-    volver.textContent = "← Ver " + nombre;
     document.title = titulo + " · wallpapers/lab";
     const img = $("vista");
     img.onload = () => $("frame").classList.add("listo");
@@ -425,15 +521,15 @@ footer a { text-decoration: none; color: var(--accent-text); }
     img.onerror = mostrarError;
     img.src = archivo(n, "vista");
     if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
-    img.alt = titulo + " en formato escritorio";
     $("titulo").textContent = titulo;
-    $("descripcion").textContent = "Fondo de la colección " + nombre + ".";
-    const fecha = fechaLinda(f.fecha);
-    if (fecha) {
-      const li = document.createElement("li");
-      li.textContent = fecha;
-      $("tags").appendChild(li);
-    }
+    const li = document.createElement("li");
+    window.I18N.alCambiar(() => {
+      volver.textContent = t("verColeccion", { nombre });
+      img.alt = t("alt", { titulo });
+      $("descripcion").textContent = t("deColeccion", { nombre });
+      li.textContent = fechaLinda(f.fecha);
+    });
+    if (li.textContent) $("tags").appendChild(li);
     $("dl-escritorio").href = archivo(n, "escritorio");
     $("peso-escritorio").textContent = f.escritorio || "";
     $("dl-mobile").href = archivo(n, "mobile");
@@ -447,12 +543,16 @@ footer a { text-decoration: none; color: var(--accent-text); }
   $("coleccion").hidden = false;
   $("col-nombre").textContent = nombre;
   const fechas = lista.map((n) => fondos[n] && fondos[n].fecha).filter(Boolean).sort();
-  $("col-fecha").textContent = fechaLinda(fechas[fechas.length - 1] || (release && release.fecha));
+  window.I18N.alCambiar(() => {
+    $("col-fecha").textContent = fechaLinda(fechas[fechas.length - 1] || (release && release.fecha));
+    document.querySelectorAll(".tarjeta").forEach((a) => a.setAttribute("aria-label", t("ver", { nombre: nombre + " " + a.dataset.n })));
+  });
   lista.forEach((n) => {
     const a = document.createElement("a");
     a.className = "tarjeta";
     a.href = linkColeccion(slug) + "&wallpaper=" + n;
-    a.setAttribute("aria-label", "Ver " + nombre + " " + n);
+    a.dataset.n = n;
+    a.setAttribute("aria-label", t("ver", { nombre: nombre + " " + n }));
     const img = document.createElement("img");
     img.src = archivo(n, "vista");
     img.alt = "";

@@ -16,9 +16,13 @@ Si algún fondo te gustó y querés dar una mano, podés invitarnos un [Cafecito
 
 ## Cómo está organizado el repo
 
-- `index.html`: la página de descarga, publicada con GitHub Pages.
-- `wallpapers.json`: la lista de fondos publicados; el más nuevo va primero.
-- `wallpapers/<estilo>/<fondo>/`: los archivos de cada fondo (`escritorio.jpg`, `mobile.jpg` y `vista.jpg`).
+- `index.html`: la landing, publicada con GitHub Pages. Se arma desde la URL:
+  - `?collection=galaxy&wallpaper=1/2/3/4`: fecha, nombre y la grilla con esos fondos.
+  - `?collection=galaxy`: la colección entera.
+  - `?collection=galaxy&wallpaper=2`: el detalle de un fondo, con sus descargas.
+- `wallpapers.json`: las colecciones publicadas; la más nueva va primero.
+- Las imágenes no viven en el repo: cada colección es una [release](https://github.com/mamiaro/wallpapersLabs/releases) con el mismo nombre, con `<coleccion>-<n>-vista.jpg`, `<coleccion>-<n>-escritorio.jpg` y `<coleccion>-<n>-mobile.jpg`.
+- `herramientas/subir-coleccion/`: doble clic en `subir-coleccion.command` para subir una carpeta de fondos (crea la release, sube los archivos y actualiza `wallpapers.json`). Necesita [GitHub CLI](https://cli.github.com) con `gh auth login`.
 - Logo y favicons de la página, en la raíz.
 
 Los fondos son gratis para uso personal.

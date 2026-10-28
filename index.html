@@ -395,9 +395,10 @@ window.I18N = (function () {
 </script>
 <script>
 // Arma la página desde la URL:
-//   ?collection=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
-//   ?collection=galaxy                    la colección entera, del 1 en adelante
-//   ?collection=galaxy&wallpaper=2        el detalle de ese fondo
+//   ?release=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
+//   ?release=galaxy                    la colección entera, del 1 en adelante
+//   ?release=galaxy&wallpaper=2        el detalle de ese fondo
+// Los links viejos con ?collection= siguen andando igual.
 // Cada colección es una release de GitHub cuyo tag es el nombre de la colección. No hay lista
 // aparte: la página le pide a la API de GitHub el título, la fecha y los archivos de la release.
 // Los archivos de cada fondo se llaman wallpaper-<n>-studio-preview.jpg (la vista),
@@ -413,7 +414,7 @@ window.I18N = (function () {
   const t = window.I18N.t;
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
-  const slug = (params.get("collection") || "").trim();
+  const slug = (params.get("release") || params.get("collection") || "").trim();
   const pedidos = (params.get("wallpaper") || "").split(/[\/,]/).map((s) => s.trim()).filter((s) => /^\d+$/.test(s));
 
   // Pide una release a la API, con caché de 10 minutos para no gastar consultas al navegar.
@@ -441,7 +442,7 @@ window.I18N = (function () {
   }
 
   const archivo = (n, tipo) => DESCARGAS + encodeURIComponent(slug) + "/" + encodeURIComponent("wallpaper-" + n + "-" + NOMBRES[tipo]);
-  const linkColeccion = (s) => "?collection=" + encodeURIComponent(s);
+  const linkColeccion = (s) => "?release=" + encodeURIComponent(s);
   const fechaLinda = (iso) => {
     const d = iso ? new Date(iso) : null;
     return d && !isNaN(d) ? d.getDate() + " " + t("meses")[d.getMonth()] + " " + d.getFullYear() : "";

@@ -205,6 +205,30 @@ footer a { text-decoration: none; color: var(--accent-text); }
   .grilla { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 }
 
+/* Home: presentación corta y las últimas colecciones, de la más nueva a la más vieja. */
+.inicio { display: flex; flex-direction: column; gap: 24px; }
+.inicio .lead { max-width: 46ch; }
+.colecciones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.col-tarjeta { display: flex; flex-direction: column; gap: 10px; text-decoration: none; }
+.col-portada {
+  aspect-ratio: 16 / 9; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface);
+}
+.col-portada img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.col-tarjeta:hover .col-portada img { transform: scale(1.04); }
+.col-tarjeta strong { display: block; font: 600 20px/1.2 var(--display); letter-spacing: -.01em; }
+.col-tarjeta small { display: block; margin-top: 4px; font: 400 12px/1.3 var(--mono); color: var(--muted); letter-spacing: .02em; }
+.col-tarjeta:hover strong { color: var(--accent-text); }
+.col-tarjeta:focus-visible { outline: none; }
+.col-tarjeta:focus-visible .col-portada { outline: 2px solid var(--accent-text); outline-offset: 3px; }
+@media (max-width: 720px) {
+  .colecciones { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .col-tarjeta strong { font-size: 17px; }
+}
+@media (max-width: 420px) {
+  .colecciones { grid-template-columns: 1fr; }
+}
+
 /* Mientras se lee la release no se muestra nada del estado normal. */
 .resolviendo .normal { visibility: hidden; }
 [hidden] { display: none !important; }
@@ -233,7 +257,7 @@ footer a { text-decoration: none; color: var(--accent-text); }
   .info { grid-template-columns: 1fr; gap: 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .dl, .frame img, .cargando, .tarjeta img { transition: none; }
+  .dl, .frame img, .cargando, .tarjeta img, .col-portada img { transition: none; }
   .cargando, .cargando::before { animation: none; }
 }
 </style>
@@ -258,6 +282,15 @@ footer a { text-decoration: none; color: var(--accent-text); }
       <h1 id="col-nombre"></h1>
     </div>
     <div class="grilla" id="grilla"></div>
+  </section>
+
+  <section class="inicio" id="inicio" hidden>
+    <div class="coleccion-cabeza">
+      <span class="fecha" data-i18n="coleccionesMarca">Colecciones</span>
+      <h1 data-i18n="inicioTitulo">Arte abstracto para tu pantalla</h1>
+      <p class="lead" data-i18n="inicioTexto">Wallpapers gratis en alta resolución, para escritorio y mobile.</p>
+    </div>
+    <div class="colecciones" id="colecciones"></div>
   </section>
 
   <a class="volver normal" id="volver" href="./" hidden>← Volver</a>
@@ -345,6 +378,8 @@ window.I18N = (function () {
       cafeBoton: "Ir a Cafecito", uso: "Gratis para uso personal.",
       noEncontrado: "Fondo no encontrado", verColeccion: "← Ver {nombre}", ver: "Ver {nombre}",
       deColeccion: "Fondo de la colección {nombre}.", alt: "{titulo} en formato escritorio", numero: "Número: {n}",
+      coleccionesMarca: "Colecciones", inicioTitulo: "Arte abstracto para tu pantalla",
+      inicioTexto: "Wallpapers gratis en alta resolución, para escritorio y mobile.", fondos: "{n} fondos",
       meses: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
     },
     en: {
@@ -360,6 +395,8 @@ window.I18N = (function () {
       cafeBoton: "Go to Cafecito", uso: "Free for personal use.",
       noEncontrado: "Wallpaper not found", verColeccion: "← See {nombre}", ver: "View {nombre}",
       deColeccion: "From the {nombre} collection.", alt: "{titulo} in desktop format", numero: "Number: {n}",
+      coleccionesMarca: "Collections", inicioTitulo: "Abstract art for your screen",
+      inicioTexto: "Free high-resolution wallpapers for desktop and mobile.", fondos: "{n} wallpapers",
       meses: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     },
   };
@@ -404,6 +441,7 @@ window.I18N = (function () {
 </script>
 <script>
 // Arma la página desde la URL:
+//   sin parámetros                     el Home, con las últimas 5 colecciones
 //   ?release=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
 //   ?release=galaxy                    la colección entera, del 1 en adelante
 //   ?release=galaxy&wallpaper=2        el detalle de ese fondo
@@ -420,6 +458,7 @@ window.I18N = (function () {
   const API = "https://api.github.com/repos/" + REPO + "/releases/";
   const NOMBRES = { vista: "studio-preview.jpg", escritorio: "studio.png", mobile: "mobile.png" };
   const MAXIMO_SIN_API = 40;
+  const COLECCIONES_EN_INICIO = 5;
   const t = window.I18N.t;
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
@@ -428,21 +467,23 @@ window.I18N = (function () {
 
   // Pide una release a la API, con caché de 10 minutos para no gastar consultas al navegar.
   // Devuelve la release, null si no existe, o undefined si la API no respondió.
+  // Con ruta vacía devuelve la lista de releases.
   async function pedirRelease(ruta) {
     const clave = "release:" + ruta;
     try {
       const guardada = JSON.parse(sessionStorage.getItem(clave) || "null");
       if (guardada && Date.now() - guardada.t < 600000) return guardada.r;
     } catch (e) {}
+    const aLiviana = (r) => ({
+      tag: r.tag_name, nombre: r.name, fecha: r.published_at,
+      archivos: (r.assets || []).map((a) => ({ nombre: a.name, peso: a.size, fecha: a.created_at })),
+    });
     try {
-      const resp = await fetch(API + ruta, { headers: { Accept: "application/vnd.github+json" } });
+      const resp = await fetch(ruta ? API + ruta : API.slice(0, -1) + "?per_page=30", { headers: { Accept: "application/vnd.github+json" } });
       if (resp.status === 404) return null;
       if (!resp.ok) return undefined;
       const r = await resp.json();
-      const liviana = {
-        tag: r.tag_name, nombre: r.name, fecha: r.published_at,
-        archivos: (r.assets || []).map((a) => ({ nombre: a.name, peso: a.size, fecha: a.created_at })),
-      };
+      const liviana = Array.isArray(r) ? r.map(aLiviana) : aLiviana(r);
       try { sessionStorage.setItem(clave, JSON.stringify({ t: Date.now(), r: liviana })); } catch (e) {}
       return liviana;
     } catch (e) {
@@ -450,7 +491,7 @@ window.I18N = (function () {
     }
   }
 
-  const archivo = (n, tipo) => DESCARGAS + encodeURIComponent(slug) + "/" + encodeURIComponent("wallpaper-" + n + "-" + NOMBRES[tipo]);
+  const archivo = (n, tipo, tag = slug) => DESCARGAS + encodeURIComponent(tag) + "/" + encodeURIComponent("wallpaper-" + n + "-" + NOMBRES[tipo]);
   const linkColeccion = (s) => "?release=" + encodeURIComponent(s);
   const fechaLinda = (iso) => {
     const d = iso ? new Date(iso) : null;
@@ -463,24 +504,63 @@ window.I18N = (function () {
 
   const raiz = document.documentElement;
   // Pantalla de error: solo el mensaje y la salida, nada de la vista ni las descargas.
-  const mostrarError = async () => {
-    ["coleccion", "volver", "stage", "info", "follow"].forEach((id) => $(id) && $(id).remove());
+  const mostrarError = () => {
+    ["inicio", "coleccion", "volver", "stage", "info", "follow"].forEach((id) => $(id) && $(id).remove());
     $("vacio").hidden = false;
     raiz.classList.add("estado-error");
     raiz.classList.remove("resolviendo");
     window.I18N.alCambiar(() => { document.title = t("noEncontrado") + " · wallpapers/lab"; });
-    // "Ver más fondos" lleva a la colección más nueva.
-    const ultima = await pedirRelease("latest");
-    if (ultima && ultima.tag) {
-      $("ver-mas").href = linkColeccion(ultima.tag);
-      $("logo").href = linkColeccion(ultima.tag);
-    } else {
-      $("ver-mas").remove();
+  };
+
+  // Home: las últimas colecciones, cada una con la vista de su primer fondo como portada.
+  const mostrarInicio = async () => {
+    ["coleccion", "volver", "stage", "info"].forEach((id) => $(id).remove());
+    const releases = await pedirRelease("");
+    const colecciones = (releases || [])
+      .map((r) => {
+        const numeros = r.archivos
+          .map((a) => /^wallpaper-(\d+)-studio-preview\.jpg$/.exec(a.nombre))
+          .filter(Boolean).map((m) => Number(m[1])).sort((a, b) => a - b);
+        return { ...r, portada: numeros[0], cantidad: numeros.length };
+      })
+      .filter((r) => r.tag && r.cantidad)
+      .sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")))
+      .slice(0, COLECCIONES_EN_INICIO);
+    if (!colecciones.length) {
+      mostrarError();
+      return;
     }
+    $("inicio").hidden = false;
+    raiz.classList.remove("resolviendo");
+    colecciones.forEach((c) => {
+      const nombre = c.nombre || c.tag;
+      const a = document.createElement("a");
+      a.className = "col-tarjeta";
+      a.href = linkColeccion(c.tag);
+      const portada = document.createElement("div");
+      portada.className = "col-portada";
+      const img = document.createElement("img");
+      img.src = archivo(c.portada, "vista", c.tag);
+      img.alt = "";
+      img.width = 1600;
+      img.height = 900;
+      img.loading = "lazy";
+      portada.appendChild(img);
+      const texto = document.createElement("span");
+      const titulo = document.createElement("strong");
+      titulo.textContent = nombre;
+      const detalle = document.createElement("small");
+      texto.append(titulo, detalle);
+      a.append(portada, texto);
+      window.I18N.alCambiar(() => {
+        detalle.textContent = [t("fondos", { n: c.cantidad }), fechaLinda(c.fecha)].filter(Boolean).join(" · ");
+      });
+      $("colecciones").appendChild(a);
+    });
   };
 
   if (!slug) {
-    mostrarError();
+    mostrarInicio();
     return;
   }
   const release = await pedirRelease("tags/" + encodeURIComponent(slug));
@@ -512,7 +592,7 @@ window.I18N = (function () {
   }
 
   const nombre = (release && release.nombre) || slug.charAt(0).toUpperCase() + slug.slice(1);
-  $("logo").href = linkColeccion(slug);
+  $("inicio").remove();
   raiz.classList.remove("resolviendo");
 
   // Un solo fondo pedido: el detalle.

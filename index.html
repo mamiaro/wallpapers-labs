@@ -344,7 +344,7 @@ window.I18N = (function () {
       cafeTitulo: "☕ Próximamente en Cafecito", cafeTexto: "Colecciones de wallpapers con variantes únicas.",
       cafeBoton: "Ir a Cafecito", uso: "Gratis para uso personal.",
       noEncontrado: "Fondo no encontrado", verColeccion: "← Ver {nombre}", ver: "Ver {nombre}",
-      deColeccion: "Fondo de la colección {nombre}.", alt: "{titulo} en formato escritorio",
+      deColeccion: "Fondo de la colección {nombre}.", alt: "{titulo} en formato escritorio", numero: "Número: {n}",
       meses: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
     },
     en: {
@@ -359,7 +359,7 @@ window.I18N = (function () {
       cafeTitulo: "☕ Coming soon to Cafecito", cafeTexto: "Wallpaper collections with unique variants.",
       cafeBoton: "Go to Cafecito", uso: "Free for personal use.",
       noEncontrado: "Wallpaper not found", verColeccion: "← See {nombre}", ver: "View {nombre}",
-      deColeccion: "From the {nombre} collection.", alt: "{titulo} in desktop format",
+      deColeccion: "From the {nombre} collection.", alt: "{titulo} in desktop format", numero: "Number: {n}",
       meses: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     },
   };
@@ -531,15 +531,18 @@ window.I18N = (function () {
     img.onerror = mostrarError;
     img.src = archivo(n, "vista");
     if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
-    $("titulo").textContent = titulo;
+    $("titulo").textContent = nombre;
     const li = document.createElement("li");
+    const liNumero = document.createElement("li");
     window.I18N.alCambiar(() => {
       volver.textContent = t("verColeccion", { nombre });
       img.alt = t("alt", { titulo });
       $("descripcion").textContent = t("deColeccion", { nombre });
       li.textContent = fechaLinda(f.fecha);
+      liNumero.textContent = t("numero", { n });
     });
     if (li.textContent) $("tags").appendChild(li);
+    $("tags").appendChild(liNumero);
     $("dl-escritorio").href = archivo(n, "escritorio");
     $("peso-escritorio").textContent = f.escritorio || "";
     $("dl-mobile").href = archivo(n, "mobile");

@@ -441,7 +441,7 @@ window.I18N = (function () {
 </script>
 <script>
 // Arma la página desde la URL:
-//   sin parámetros                     el Home, con las últimas 6 colecciones
+//   sin parámetros                     el Home, con todas las colecciones
 //   ?release=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
 //   ?release=galaxy                    la colección entera, del 1 en adelante
 //   ?release=galaxy&wallpaper=2        el detalle de ese fondo
@@ -458,7 +458,6 @@ window.I18N = (function () {
   const API = "https://api.github.com/repos/" + REPO + "/releases/";
   const NOMBRES = { vista: "studio-preview.jpg", escritorio: "studio.png", mobile: "mobile.png" };
   const MAXIMO_SIN_API = 40;
-  const COLECCIONES_EN_INICIO = 6;
   const t = window.I18N.t;
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
@@ -479,7 +478,7 @@ window.I18N = (function () {
       archivos: (r.assets || []).map((a) => ({ nombre: a.name, peso: a.size, fecha: a.created_at })),
     });
     try {
-      const resp = await fetch(ruta ? API + ruta : API.slice(0, -1) + "?per_page=30", { headers: { Accept: "application/vnd.github+json" } });
+      const resp = await fetch(ruta ? API + ruta : API.slice(0, -1) + "?per_page=100", { headers: { Accept: "application/vnd.github+json" } });
       if (resp.status === 404) return null;
       if (!resp.ok) return undefined;
       const r = await resp.json();
@@ -512,7 +511,7 @@ window.I18N = (function () {
     window.I18N.alCambiar(() => { document.title = t("noEncontrado") + " · wallpapers/lab"; });
   };
 
-  // Home: las últimas colecciones, cada una con la vista de su primer fondo como portada.
+  // Home: todas las colecciones, de la más nueva a la más vieja, cada una con la vista de su primer fondo como portada.
   const mostrarInicio = async () => {
     ["coleccion", "volver", "stage", "info"].forEach((id) => $(id).remove());
     const releases = await pedirRelease("");
@@ -524,8 +523,7 @@ window.I18N = (function () {
         return { ...r, portada: numeros[0], cantidad: numeros.length };
       })
       .filter((r) => r.tag && r.cantidad)
-      .sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")))
-      .slice(0, COLECCIONES_EN_INICIO);
+      .sort((a, b) => String(b.fecha || "").localeCompare(String(a.fecha || "")));
     if (!colecciones.length) {
       mostrarError();
       return;

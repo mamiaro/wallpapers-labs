@@ -24,7 +24,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap">
 <style>
 /* Layout: una sola columna; el fondo manda arriba, debajo nombre, descargas y la puerta de vuelta a X. */
 :root {
@@ -128,8 +128,6 @@ figcaption { font: 400 12px/1.4 var(--mono); color: var(--muted); letter-spacing
 .info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
 .info > * { min-width: 0; }
 h1 { margin: 0 0 8px; font: 600 clamp(40px, 7vw, 64px)/1 var(--display); letter-spacing: -.03em; }
-/* El número del fondo se separa del nombre de la colección: más liviano y en lavanda. */
-h1 .numero { font-weight: 400; color: var(--accent-text); }
 .lead { margin: 0; color: var(--muted); max-width: 42ch; }
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding: 0; list-style: none; }
 .tags li { font: 400 12px/1 var(--mono); border: 1px solid var(--line); padding: 7px 11px; border-radius: var(--r-sm); color: var(--muted); }
@@ -346,7 +344,7 @@ window.I18N = (function () {
       cafeTitulo: "☕ Próximamente en Cafecito", cafeTexto: "Colecciones de wallpapers con variantes únicas.",
       cafeBoton: "Ir a Cafecito", uso: "Gratis para uso personal.",
       noEncontrado: "Fondo no encontrado", verColeccion: "← Ver {nombre}", ver: "Ver {nombre}",
-      deColeccion: "Fondo de la colección {nombre}.", alt: "{titulo} en formato escritorio",
+      deColeccion: "Fondo de la colección {nombre}.", alt: "{titulo} en formato escritorio", numero: "Número: {n}",
       meses: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"],
     },
     en: {
@@ -361,7 +359,7 @@ window.I18N = (function () {
       cafeTitulo: "☕ Coming soon to Cafecito", cafeTexto: "Wallpaper collections with unique variants.",
       cafeBoton: "Go to Cafecito", uso: "Free for personal use.",
       noEncontrado: "Wallpaper not found", verColeccion: "← See {nombre}", ver: "View {nombre}",
-      deColeccion: "From the {nombre} collection.", alt: "{titulo} in desktop format",
+      deColeccion: "From the {nombre} collection.", alt: "{titulo} in desktop format", numero: "Number: {n}",
       meses: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     },
   };
@@ -533,18 +531,18 @@ window.I18N = (function () {
     img.onerror = mostrarError;
     img.src = archivo(n, "vista");
     if (img.complete && img.naturalWidth) $("frame").classList.add("listo");
-    const numero = document.createElement("span");
-    numero.className = "numero";
-    numero.textContent = n;
-    $("titulo").replaceChildren(nombre + " ", numero);
+    $("titulo").textContent = nombre;
     const li = document.createElement("li");
+    const liNumero = document.createElement("li");
     window.I18N.alCambiar(() => {
       volver.textContent = t("verColeccion", { nombre });
       img.alt = t("alt", { titulo });
       $("descripcion").textContent = t("deColeccion", { nombre });
       li.textContent = fechaLinda(f.fecha);
+      liNumero.textContent = t("numero", { n });
     });
     if (li.textContent) $("tags").appendChild(li);
+    $("tags").appendChild(liNumero);
     $("dl-escritorio").href = archivo(n, "escritorio");
     $("peso-escritorio").textContent = f.escritorio || "";
     $("dl-mobile").href = archivo(n, "mobile");

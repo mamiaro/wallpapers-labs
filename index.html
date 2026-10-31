@@ -441,7 +441,7 @@ window.I18N = (function () {
 </script>
 <script>
 // Arma la página desde la URL:
-//   sin parámetros                     el Home, con las últimas 5 colecciones
+//   sin parámetros                     el Home, con las últimas 6 colecciones
 //   ?release=galaxy&wallpaper=1/2/3/4  fecha, nombre y la grilla con esos fondos, en ese orden
 //   ?release=galaxy                    la colección entera, del 1 en adelante
 //   ?release=galaxy&wallpaper=2        el detalle de ese fondo
@@ -458,7 +458,7 @@ window.I18N = (function () {
   const API = "https://api.github.com/repos/" + REPO + "/releases/";
   const NOMBRES = { vista: "studio-preview.jpg", escritorio: "studio.png", mobile: "mobile.png" };
   const MAXIMO_SIN_API = 40;
-  const COLECCIONES_EN_INICIO = 5;
+  const COLECCIONES_EN_INICIO = 6;
   const t = window.I18N.t;
   const $ = (id) => document.getElementById(id);
   const params = new URLSearchParams(location.search);
